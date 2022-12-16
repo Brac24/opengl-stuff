@@ -76,9 +76,9 @@ int main()
     // Keep in mind that middle of the opengl window is the origin considered (0, 0)
     // where -1 <= x <= 1 and -1 <= y <= 1 and -1 <= z <= 1
     float vertices[] = {
-        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   // Bottom right - Red
-       -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   // Bottom left  - Green
-        0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f    // Top          - Blue
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,  // Bottom right  - Red   (RGBA - 1001)
+       -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 0.5f,   // Bottom left  - Green (RGBA - 0101)
+        0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 0.5f    // Top          - Blue  (RGBA = 0010)
     };
 
     // Construct shader source code
@@ -101,7 +101,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO); 
     // This will copy the vertex data defined in vertices[] array into the VBO buffer memory
     // GL_STATIC_DRAW specifies to the GPU that the data will most likely not change at all
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
 
     // Create a shader pipeline object that will compile and link our shaders into a 
@@ -120,7 +120,7 @@ int main()
     // in Normalized Device Coordinates manually so we set this to false
     // Fifth parameter specifies how many bytes are contained within a single vertex.
     // If we had 3D vector vertex position and a 4D vector RGBA vector color and each value is 4 bytes because each is a 32-bit float
-    // then this stride parameter would the sum of all components for each attribute in that vector so 3 + 4 = 7
+    // then this stride parameter would the sum of all components for each attribute in that vector so 3 components for position + 4 components for color = 7
     // multiplied by the number of bytes in each component so 7*4 = 28 bytes. So there would be a total of 28 bytes
     // for a complete vertex that included its position and color attributes.
     // In our case we only specify one attribute that is a 3D position vector so it would be 3*4 = 12 bytes
@@ -128,9 +128,9 @@ int main()
     // If we had the 3D position and a 4D color vector for our vertex, the first attribute being position would have an
     // offset of 0 since it is our first attribute. The color vector would have an offset of 3*4 = 12 bytes.
     // We only have a position attribute so we have a 0 offset/
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0); // This API call is tied to the VAO
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)0); // This API call is tied to the VAO
     //I wanted to provide what it might look like if I had a 3D color attribute for the vertex
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(0);
     //If we had that color attribute we would also have to enable attribute 1
     glEnableVertexAttribArray(1);
@@ -141,8 +141,8 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f); // sets the color to use when clearing the color buffer
         glClear(GL_COLOR_BUFFER_BIT);         // clear the color buffer using the color set above
         // input
