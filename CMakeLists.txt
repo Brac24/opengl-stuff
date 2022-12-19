@@ -17,7 +17,9 @@ file(STRINGS assets/glsl/plainVertexShader.vs VERTEX_SHADER)
 add_library(glad ${CMAKE_CURRENT_SOURCE_DIR}/external/include/glad.h ${CMAKE_CURRENT_SOURCE_DIR}/external/src/glad.c)
 
 # Create an executable based on the triangle.cpp source file
-add_executable(opengl-app ${SOURCE_DIR}/triangle.cpp ${SOURCE_DIR}/ShaderPipeline.cpp)
+add_executable(opengl-app ${SOURCE_DIR}/triangle.cpp ${SOURCE_DIR}/ShaderPipeline.cpp ${SOURCE_DIR}/VertexAttribute.cpp 
+                          ${SOURCE_DIR}/VertexDataBuffer.cpp
+              )
 
 target_include_directories(glad PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/include) # This is to let cmake know what header files to use to build the library
 

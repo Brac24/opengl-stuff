@@ -7,6 +7,7 @@
 #include <ShaderPipeline.h>
 #include <fstream>
 #include <sstream>
+#include <VertexDataBuffer.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -76,67 +77,38 @@ int main()
     // Keep in mind that middle of the opengl window is the origin considered (0, 0)
     // where -1 <= x <= 1 and -1 <= y <= 1 and -1 <= z <= 1
     float vertices[] = {
-        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,  // Bottom right  - Red   (RGBA - 1001)
-       -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 0.5f,   // Bottom left  - Green (RGBA - 0101)
-        0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 0.5f    // Top          - Blue  (RGBA = 0010)
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,  // Bottom right  - Red   (RGBA - 1001)   index 0
+       -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,   // Bottom left  - Green (RGBA - 0101)   index 1
+        0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,    // Top          - Blue  (RGBA = 0011)  index 2
     };
 
-    // Construct shader source code
-    //-------------------------------
-    // VBO is a variable name that stands for Vertex Buffer Object
-    // A VBO is an OpenGL object that allows us to interact with the GPU memory to store vertex data
-    // Maybe a good way to think about it is as an interface to the GPU memory specifically for vertex data
-    // For example a VBO allows us to assign vertex data to a GPU's memory where a vertex shader can then
-    // take that vertex data in the GPU and process it. *Note that there are other kinds of buffer objects.
-    unsigned int VBO;
-    unsigned int VAO;
-    // Generates a buffer object and assigns the buffer ID to the VBO variable. 
-    // I believe this is just a general buffer object not specific to being a vertex buffer object.
-    // First parameter of glGenBuffers is how many buffers we want to generate
-    glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    // This essentially directly binds the general buffer object to the vertex buffer and now VBO is considered a vertex buffer object.
-    // GL_ARRAY_BUFFER is the buffer type that refers to a vertext buffer object
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-    // This will copy the vertex data defined in vertices[] array into the VBO buffer memory
-    // GL_STATIC_DRAW specifies to the GPU that the data will most likely not change at all
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    float squareVertices[] = {
+        // Defining vertices for square
+        -0.25f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.5f, // bottom left corner   index 3
+        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, // bottom right corner  index 4
+        -0.25f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.5f, // top left             index 5
+        0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f  // top right            index 6
+    };
 
+    uint16_t triangleIndices[] = {0,1,2};
+    uint32_t squareIndices[] = {0,1,2, 1,2,3};
 
     // Create a shader pipeline object that will compile and link our shaders into a 
     // shader program in our GPU
     ShaderPipeline shaderPipeline(vertexShaderString, fragmentShaderString);
 
-    // A vertex attribute is a piece of information attached to the vertex
-    // For example, vertex position is an attribute, vertex color is an attribute.
-    // The first parameter specifies which attribute we are talking about. Here it is 0 since we only have a single attribute
-    // which is position.
-    // If we had a color attribute for the vertex then we would call this function again and that index parameter would
-    // then say 1 which refers to the next attribute of the vertex.
-    // The second parameter specifies number of components in that attribute (i.e. 3D vector would be 3 and 2D vector would be 2)
-    // The third parameter specifies what type the data is which in our case it is just float data
-    // Fourth parameter specifies whether we want OpenGL to normalize for us. We have already defined our vertex positions
-    // in Normalized Device Coordinates manually so we set this to false
-    // Fifth parameter specifies how many bytes are contained within a single vertex.
-    // If we had 3D vector vertex position and a 4D vector RGBA vector color and each value is 4 bytes because each is a 32-bit float
-    // then this stride parameter would the sum of all components for each attribute in that vector so 3 components for position + 4 components for color = 7
-    // multiplied by the number of bytes in each component so 7*4 = 28 bytes. So there would be a total of 28 bytes
-    // for a complete vertex that included its position and color attributes.
-    // In our case we only specify one attribute that is a 3D position vector so it would be 3*4 = 12 bytes
-    // The final parameter specifies the offset of where this specific attribute is.
-    // If we had the 3D position and a 4D color vector for our vertex, the first attribute being position would have an
-    // offset of 0 since it is our first attribute. The color vector would have an offset of 3*4 = 12 bytes.
-    // We only have a position attribute so we have a 0 offset/
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)0); // This API call is tied to the VAO
-    //I wanted to provide what it might look like if I had a 3D color attribute for the vertex
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(0);
-    //If we had that color attribute we would also have to enable attribute 1
-    glEnableVertexAttribArray(1);
+    // Define the triangle vertex data
 
-    glEnable(GL_MULTISAMPLE); // Used for antialiasing. Although Anitaliasing was still working without this. Simply giving the glfw hint was enough
+    VertexAttribute positionAttribute(0, 3, GL_FLOAT, GL_FALSE);
+    VertexAttribute colorAttribute(1, 4, GL_FLOAT, GL_FALSE);
 
+    // Creates a VBO and VAO and sets the vertex data to the VBO
+    VertexDataBuffer objectDataBuffer(std::vector<VertexAttribute>{positionAttribute, colorAttribute}, 7, vertices, sizeof(vertices));
+
+    // Creates vertex buffer object containing square. This also creates the index buffer used to draw the square
+    VertexDataBuffer squareDataBuffer(std::vector<VertexAttribute>{positionAttribute, colorAttribute}, 7, squareVertices, sizeof(squareVertices), squareIndices, sizeof(squareIndices));
+
+    
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -150,13 +122,19 @@ int main()
         processInput(window);
 
         
-        //glUseProgram(shaderProgram);
         shaderPipeline.activate();
         float timeValue = glfwGetTime();
         float attenuateValue = (cos(timeValue)/2.0f) + 0.5f;
         int vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
         glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
+        
+        // Bind and draw triangle
+        objectDataBuffer.bind();
         glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        // Bind and draw square
+        squareDataBuffer.bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
