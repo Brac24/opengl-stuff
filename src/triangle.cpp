@@ -8,6 +8,8 @@
 #include <fstream>
 #include <sstream>
 #include <VertexDataBuffer.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -17,6 +19,8 @@ const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 768;
 
 const uint16_t FRAG_SAMPLES = 8;
+
+int textureWidth, textureHeight, textureColorChannels;
 
 // Reading contents from a file
 // Credit to stack overflow answer:
@@ -35,6 +39,11 @@ int main()
     // Put contents of vertex and frag shaders into strings
     auto vertexShaderString = get_file_contents("../assets/glsl/plainVertexShader.vs");
     auto fragmentShaderString = get_file_contents("../assets/glsl/plainFragmentShader.fs");
+    auto textureVertexShaderString = get_file_contents("../assets/glsl/textureVertexShader.vs");
+    auto textureFragmentShaderString = get_file_contents("../assets/glsl/textureFragmentShader.fs");
+
+    unsigned char* containerTextureData = stbi_load("../assets/textures/container.jpg", &textureWidth, &textureHeight, &textureColorChannels, 0);
+
 
     // glfw: initialize and configure
     // ------------------------------
@@ -84,10 +93,10 @@ int main()
 
     float squareVertices[] = {
         // Defining vertices for square
-        -0.25f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.5f, // bottom left corner   index 3
-        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, // bottom right corner  index 4
-        -0.25f, 0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.5f, // top left             index 5
-        0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f  // top right            index 6
+       -0.25f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, // bottom left corner   index 0
+        0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, // bottom right corner  index 1
+       -0.25f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 1.0f, // top left             index 2
+        0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f  // top right            index 3
     };
 
     uint16_t triangleIndices[] = {0,1,2};
@@ -97,17 +106,34 @@ int main()
     // shader program in our GPU
     ShaderPipeline shaderPipeline(vertexShaderString, fragmentShaderString);
 
+    ShaderPipeline textureShaderPipeline(textureVertexShaderString, textureFragmentShaderString);
+
     // Define the triangle vertex data
 
     VertexAttribute positionAttribute(0, 3, GL_FLOAT, GL_FALSE);
     VertexAttribute colorAttribute(1, 4, GL_FLOAT, GL_FALSE);
+    VertexAttribute texCoordinateAttribute(2, 2, GL_FLOAT, GL_FALSE);
 
     // Creates a VBO and VAO and sets the vertex data to the VBO
     VertexDataBuffer objectDataBuffer(std::vector<VertexAttribute>{positionAttribute, colorAttribute}, 7, vertices, sizeof(vertices));
 
     // Creates vertex buffer object containing square. This also creates the index buffer used to draw the square
-    VertexDataBuffer squareDataBuffer(std::vector<VertexAttribute>{positionAttribute, colorAttribute}, 7, squareVertices, sizeof(squareVertices), squareIndices, sizeof(squareIndices));
+    VertexDataBuffer squareDataBuffer(std::vector<VertexAttribute>{positionAttribute, colorAttribute, texCoordinateAttribute}, 9, squareVertices, sizeof(squareVertices), squareIndices, sizeof(squareIndices));
+    
 
+    // Texture Implementation
+
+    uint32_t containerTextureId;
+    glGenTextures(1, &containerTextureId);
+    glBindTexture(GL_TEXTURE_2D, containerTextureId);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(containerTextureData);
     
     // render loop
     // -----------
@@ -133,6 +159,8 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Bind and draw square
+        textureShaderPipeline.activate();
+        glBindTexture(GL_TEXTURE_2D, containerTextureId);
         squareDataBuffer.bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
