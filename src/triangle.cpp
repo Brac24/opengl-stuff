@@ -93,10 +93,11 @@ int main()
 
     float squareVertices[] = {
         // Defining vertices for square
-       -0.25f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, // bottom left corner   index 0
-        0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f, // bottom right corner  index 1
-       -0.25f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 1.0f, // top left             index 2
-        0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f  // top right            index 3
+        //--- Position --    |---- Color -----------    |---Texture Coordinate-----|
+       -0.25f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     0.0f, 0.0f, // bottom left corner   index 0
+        0.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     1.0f, 0.0f, // bottom right corner  index 1
+       -0.25f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     0.0f, 1.0f, // top left             index 2
+        0.0f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     1.0f, 1.0f  // top right            index 3
     };
 
     uint16_t triangleIndices[] = {0,1,2};
@@ -106,10 +107,10 @@ int main()
     // shader program in our GPU
     ShaderPipeline shaderPipeline(vertexShaderString, fragmentShaderString);
 
+    // Shader program used for textures
     ShaderPipeline textureShaderPipeline(textureVertexShaderString, textureFragmentShaderString);
 
-    // Define the triangle vertex data
-
+    // Define available vertex attributes. These attributes are the attributes in the glsl programs labeledl with the layout =  command
     VertexAttribute positionAttribute(0, 3, GL_FLOAT, GL_FALSE);
     VertexAttribute colorAttribute(1, 4, GL_FLOAT, GL_FALSE);
     VertexAttribute texCoordinateAttribute(2, 2, GL_FLOAT, GL_FALSE);
@@ -159,9 +160,9 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Bind and draw square
-        textureShaderPipeline.activate();
-        glBindTexture(GL_TEXTURE_2D, containerTextureId);
-        squareDataBuffer.bind();
+        textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
+        glBindTexture(GL_TEXTURE_2D, containerTextureId); // bind the texture we want to sample from
+        squareDataBuffer.bind();                          // bind our vertex data which include texture coordinates for each vertex
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
