@@ -42,6 +42,7 @@ int main()
     auto textureVertexShaderString = get_file_contents("../assets/glsl/textureVertexShader.vs");
     auto textureFragmentShaderString = get_file_contents("../assets/glsl/textureFragmentShader.fs");
 
+    // load the image data of the container crate
     unsigned char* containerTextureData = stbi_load("../assets/textures/container.jpg", &textureWidth, &textureHeight, &textureColorChannels, 0);
 
 
@@ -132,6 +133,8 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // The function below will bind the image that was loaded into containerTextureData to the currently bound texture
+    // which in this case is containerTextureId which was bound a few lines above.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(containerTextureData);
