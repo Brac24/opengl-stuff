@@ -14,7 +14,7 @@ Texture::~Texture(){}
 
 void Texture::bind()
 {
-    glBindTexture(mTargetType, mTextureId);
+    glBindTexture(mTargetType, mTextureId); // binds a texture id to a texture target type such as GL_TEXTURE_2D
 }
 
 void Texture::unbind()
@@ -30,6 +30,8 @@ void Texture::loadToGpu()
 
 void Texture::setDefaultTextureParams()
 {
+    // These default parameter settings were set based on the following article
+    // https://learnopengl.com/Getting-started/Textures
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

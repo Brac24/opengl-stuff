@@ -21,8 +21,6 @@ const unsigned int SCR_HEIGHT = 768;
 
 const uint16_t FRAG_SAMPLES = 8;
 
-int textureWidth, textureHeight, textureColorChannels;
-
 // Reading contents from a file
 // Credit to stack overflow answer:
 // https://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
@@ -42,10 +40,6 @@ int main()
     auto fragmentShaderString = get_file_contents("../assets/glsl/plainFragmentShader.fs");
     auto textureVertexShaderString = get_file_contents("../assets/glsl/textureVertexShader.vs");
     auto textureFragmentShaderString = get_file_contents("../assets/glsl/textureFragmentShader.fs");
-
-    // load the image data of the container crate
-    //unsigned char* containerTextureData = stbi_load("../assets/textures/container.jpg", &textureWidth, &textureHeight, &textureColorChannels, 0);
-    Texture containerTexture("../assets/textures/container.jpg");
 
     // glfw: initialize and configure
     // ------------------------------
@@ -125,20 +119,12 @@ int main()
     
 
     // Texture Implementation
-
-    uint32_t containerTextureId;
-    glGenTextures(1, &containerTextureId);
-    glBindTexture(GL_TEXTURE_2D, containerTextureId);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // The function below will bind the image that was loaded into containerTextureData to the currently bound texture
-    // which in this case is containerTextureId which was bound a few lines above.
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    //stbi_image_free(containerTextureData);
+    // load the image data of the container crate
+    Texture containerTexture("../assets/textures/container.jpg"); // This must be called after the OpenGL context has been initialized with glfw or else the glGenTextures in the constructor will seg fault.
+    containerTexture.bind();
+    containerTexture.setDefaultTextureParams();
+    containerTexture.loadToGpu();
+    containerTexture.generateMipmap();
     
     // render loop
     // -----------
@@ -167,7 +153,6 @@ int main()
         textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
         vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
         glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
-        glBindTexture(GL_TEXTURE_2D, containerTextureId); // bind the texture we want to sample from
         squareDataBuffer.bind();                          // bind our vertex data which include texture coordinates for each vertex
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
