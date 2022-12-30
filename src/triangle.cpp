@@ -8,8 +8,9 @@
 #include <fstream>
 #include <sstream>
 #include <VertexDataBuffer.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+//#define STB_IMAGE_IMPLEMENTATION
+//#include "stb_image.h"
+#include "Texture.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -43,8 +44,8 @@ int main()
     auto textureFragmentShaderString = get_file_contents("../assets/glsl/textureFragmentShader.fs");
 
     // load the image data of the container crate
-    unsigned char* containerTextureData = stbi_load("../assets/textures/container.jpg", &textureWidth, &textureHeight, &textureColorChannels, 0);
-
+    //unsigned char* containerTextureData = stbi_load("../assets/textures/container.jpg", &textureWidth, &textureHeight, &textureColorChannels, 0);
+    Texture containerTexture("../assets/textures/container.jpg");
 
     // glfw: initialize and configure
     // ------------------------------
@@ -135,9 +136,9 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // The function below will bind the image that was loaded into containerTextureData to the currently bound texture
     // which in this case is containerTextureId which was bound a few lines above.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, containerTextureData);
     glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(containerTextureData);
+    //stbi_image_free(containerTextureData);
     
     // render loop
     // -----------
@@ -164,6 +165,8 @@ int main()
 
         // Bind and draw square
         textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
+        vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
+        glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
         glBindTexture(GL_TEXTURE_2D, containerTextureId); // bind the texture we want to sample from
         squareDataBuffer.bind();                          // bind our vertex data which include texture coordinates for each vertex
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

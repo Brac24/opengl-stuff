@@ -14,11 +14,12 @@ file(STRINGS assets/glsl/plainVertexShader.vs VERTEX_SHADER)
 
 # Add glad as a library to the project. Header and source files exist in project
 # The add_library will create a static library for glad called libglad.a in build folder
-add_library(glad ${CMAKE_CURRENT_SOURCE_DIR}/external/include/glad.h ${CMAKE_CURRENT_SOURCE_DIR}/external/src/glad.c)
+add_library(glad ${CMAKE_CURRENT_SOURCE_DIR}/external/include/glad.h ${CMAKE_CURRENT_SOURCE_DIR}/external/src/glad.c
+                 ${CMAKE_CURRENT_SOURCE_DIR}/external/include/stb_image.h)
 
 # Create an executable based on the triangle.cpp source file
 add_executable(opengl-app ${SOURCE_DIR}/triangle.cpp ${SOURCE_DIR}/ShaderPipeline.cpp ${SOURCE_DIR}/VertexAttribute.cpp 
-                          ${SOURCE_DIR}/VertexDataBuffer.cpp
+                          ${SOURCE_DIR}/VertexDataBuffer.cpp ${SOURCE_DIR}/Texture.cpp
               )
 
 target_include_directories(glad PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/include) # This is to let cmake know what header files to use to build the library
