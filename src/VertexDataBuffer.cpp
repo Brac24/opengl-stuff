@@ -5,13 +5,13 @@
 VertexDataBuffer::VertexDataBuffer(std::vector<VertexAttribute> vertexAttributes, int totalComponentsPerVertex, const float* vertexData, GLsizeiptr vertexDataSize):
 mVertexAttributes(vertexAttributes)
 {
-    // Generates a buffer object and assigns the buffer ID to the VBO variable. 
+    // Generates a buffer object and assigns the buffer ID to the mVbo variable. 
     // I believe this is just a general buffer object not specific to being a vertex buffer object.
     // First parameter of glGenBuffers is how many buffers we want to generate
     glGenBuffers(1, &mVbo);
     glGenVertexArrays(1, &mVao);
-    glBindVertexArray(mVao);
-    // This essentially directly binds the general buffer object to the vertex buffer and now VBO is considered a vertex buffer object.
+    glBindVertexArray(mVao); // generic buffer now becomes a vertex array object
+    // This essentially directly binds the general buffer object to the vertex buffer and now mVbo is considered a vertex buffer object.
     // GL_ARRAY_BUFFER is the buffer type that refers to a vertext buffer object
     glBindBuffer(GL_ARRAY_BUFFER, mVbo); 
 
@@ -35,7 +35,7 @@ mVertexAttributes(vertexAttributes)
         // in Normalized Device Coordinates manually so we set this to false
         // Fifth parameter specifies how many bytes are contained within a single vertex.
         // If we had 3D vector vertex position and a 4D vector RGBA vector color and each value is 4 bytes because each is a 32-bit float
-        // then this stride parameter would the sum of all components for each attribute in that vector so 3 components for position + 4 components for color = 7
+        // then this stride parameter would be the sum of all components for each attribute in that vector so 3 components for position + 4 components for color = 7
         // multiplied by the number of bytes in each component so 7*4 = 28 bytes. So there would be a total of 28 bytes
         // for a complete vertex that included its position and color attributes.
         // In our case we only specify one attribute that is a 3D position vector so it would be 3*4 = 12 bytes
