@@ -11,6 +11,7 @@
 //#define STB_IMAGE_IMPLEMENTATION
 //#include "stb_image.h"
 #include "Texture.h"
+#include <Instrumentor.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -145,9 +146,9 @@ int main()
         int vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
         glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
         
-        // Bind and draw triangle
+        // Bind the triangle data which exists in objectDataBuffer and draw triangle
         objectDataBuffer.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the currently bound buffer.
 
         // Bind and draw square
         textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
