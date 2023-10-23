@@ -36,6 +36,7 @@ std::string get_file_contents(const char* filename)
 
 int main()
 {
+    PROFILE_BEGIN_SESSION("opengl-profiling", "/tmp/myopengl-profile");
     // Put contents of vertex and frag shaders into strings
     auto vertexShaderString = get_file_contents("../assets/glsl/plainVertexShader.vs");
     auto fragmentShaderString = get_file_contents("../assets/glsl/plainFragmentShader.fs");
@@ -126,46 +127,63 @@ int main()
     containerTexture.setDefaultTextureParams();
     containerTexture.loadToGpu();
     containerTexture.generateMipmap();
-    
+    //PROFILE_FUNCTION();
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+        {
+
+        PROFILE_SCOPE("RenderLoop Clear Screen");
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f); // sets the color to use when clearing the color buffer
         glClear(GL_COLOR_BUFFER_BIT);         // clear the color buffer using the color set above
+        }
+
+{
+        PROFILE_SCOPE("RenderLoop Process Input");
         // input
         // -----
         processInput(window);
-
-        
+}
+float timeValue;
+float attenuateValue;
+int vertexColorLocation;
+{
+        PROFILE_SCOPE("RenderLoop Drawing Triangle");        
         shaderPipeline.activate();
-        float timeValue = glfwGetTime();
-        float attenuateValue = (cos(timeValue)/2.0f) + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
+        timeValue = glfwGetTime();
+        attenuateValue = (cos(timeValue)/2.0f) + 0.5f;
+        vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
         glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
-        
+       
         // Bind the triangle data which exists in objectDataBuffer and draw triangle
         objectDataBuffer.bind();
         glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the currently bound buffer.
-
+}
+{
+        PROFILE_SCOPE("RenderLoop Drawing Texture");
         // Bind and draw square
         textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
         vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
         glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
         squareDataBuffer.bind();                          // bind our vertex data which include texture coordinates for each vertex
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
+}
+{
+        PROFILE_SCOPE("RenderLoop Swap Buffers and Poll Events");
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
-        glfwPollEvents();
+       glfwPollEvents();
+}
     }
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
+    PROFILE_END_SESSION();
     return 0;
 }
 
