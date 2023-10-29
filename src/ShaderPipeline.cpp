@@ -2,6 +2,7 @@
 #include <iostream>
 
 
+
 ShaderPipeline::ShaderPipeline(const std::string& vertexShaderSource, const std::string& fragmentShaderSource)
 {
 
@@ -73,6 +74,12 @@ ShaderPipeline::~ShaderPipeline(){}
 void ShaderPipeline::activate()
 {
     glUseProgram(mProgramId);
+}
+
+void ShaderPipeline::setUniformFloat(const std::string& uniformName, const glm::vec3& value)
+{
+    auto vertexColorLocation = glGetUniformLocation(getProgramId(), uniformName.c_str()); // get location of uniform from the shader
+    glUniform3f(vertexColorLocation, value.r, value.g, value.b); // set the uniform with the given value
 }
 
 uint32_t ShaderPipeline::getProgramId()

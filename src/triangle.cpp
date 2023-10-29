@@ -12,6 +12,7 @@
 //#include "stb_image.h"
 #include "Texture.h"
 #include <Instrumentor.h>
+#include <glm/glm.hpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -133,7 +134,6 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         {
-
         PROFILE_SCOPE("RenderLoop Clear Screen");
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -155,8 +155,7 @@ int vertexColorLocation;
         shaderPipeline.activate();
         timeValue = glfwGetTime();
         attenuateValue = (cos(timeValue)/2.0f) + 0.5f;
-        vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
-        glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
+        shaderPipeline.setUniformFloat("attenuate", glm::vec3(attenuateValue)); // set the uniform in the shader that will vary the color of the vertices
        
         // Bind the triangle data which exists in objectDataBuffer and draw triangle
         objectDataBuffer.bind();
@@ -166,8 +165,7 @@ int vertexColorLocation;
         PROFILE_SCOPE("RenderLoop Drawing Texture");
         // Bind and draw square
         textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
-        vertexColorLocation = glGetUniformLocation(shaderPipeline.getProgramId(), "attenuate");
-        glUniform3f(vertexColorLocation, attenuateValue, attenuateValue, attenuateValue);
+        textureShaderPipeline.setUniformFloat("attenuate", glm::vec3(attenuateValue)); // set the uniform in the shader that will vary the color of the vertices
         squareDataBuffer.bind();                          // bind our vertex data which include texture coordinates for each vertex
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
