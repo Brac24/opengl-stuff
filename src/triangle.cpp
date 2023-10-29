@@ -17,8 +17,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+const unsigned int SCR_WIDTH = 768;
+const unsigned int SCR_HEIGHT = 1024;
 
 const uint16_t FRAG_SAMPLES = 8;
 
@@ -79,7 +79,7 @@ int main()
     // In real applications, these come into shaders as inputs but are not already in NDC as they are here.
     // *Note that by vertices in this code we mean vertex positions since other kinds of information can be
     // attached to a single vertex such as normals, color, etc. each of these pieces of information attached
-    // to a vertex is called a vertext attribute. Color is a vertex attribute, position is a vertex attribute, etc.
+    // to a vertex is called a vertex attribute. Color is a vertex attribute, position is a vertex attribute, etc.
     // Below are the 3 vertex positions that make up the triangle we want to draw.
     // Keep in mind that middle of the opengl window is the origin considered (0, 0)
     // where -1 <= x <= 1 and -1 <= y <= 1 and -1 <= z <= 1
@@ -126,7 +126,7 @@ int main()
     containerTexture.bind();
     containerTexture.setDefaultTextureParams();
     containerTexture.loadToGpu();
-    containerTexture.generateMipmap();
+    //containerTexture.generateMipmap(); // Used to use this because setDefaultTextureParams() set up use of mip maps but that was removed
     //PROFILE_FUNCTION();
     // render loop
     // -----------
@@ -205,5 +205,5 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, width, height); // calling this will redraw symbols to fit the new window size
 }
