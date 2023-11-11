@@ -1,20 +1,20 @@
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
-//#include "pch.h"
+// #include "pch.h"
 #include <iostream>
 #include <math.h>
 #include <ShaderPipeline.h>
 #include <fstream>
 #include <sstream>
 #include <VertexDataBuffer.h>
-//#define STB_IMAGE_IMPLEMENTATION
-//#include "stb_image.h"
+// #define STB_IMAGE_IMPLEMENTATION
+// #include "stb_image.h"
 #include "Texture.h"
 #include <Instrumentor.h>
 #include <glm/glm.hpp>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
 // settings
@@ -26,9 +26,9 @@ const uint16_t FRAG_SAMPLES = 8;
 // Reading contents from a file
 // Credit to stack overflow answer:
 // https://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
-std::string get_file_contents(const char* filename)
+std::string get_file_contents(const char *filename)
 {
-	std::ifstream t(filename);
+    std::ifstream t(filename);
     std::stringstream buffer;
     buffer << t.rdbuf();
 
@@ -58,7 +58,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Bracamontes OpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Bracamontes OpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -85,24 +85,24 @@ int main()
     // Keep in mind that middle of the opengl window is the origin considered (0, 0)
     // where -1 <= x <= 1 and -1 <= y <= 1 and -1 <= z <= 1
     float vertices[] = {
-        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,  // Bottom right  - Red   (RGBA - 1001)   index 0
-       -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,   // Bottom left  - Green (RGBA - 0101)   index 1
-        0.0f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,    // Top          - Blue  (RGBA = 0011)  index 2
+        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // Bottom right  - Red   (RGBA - 1001)   index 0
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // Bottom left  - Green (RGBA - 0101)   index 1
+        0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // Top          - Blue  (RGBA = 0011)  index 2
     };
 
     float squareVertices[] = {
         // Defining vertices for square
         //--- Position --    |---- Color -----------    |---Texture Coordinate-----|
-       -0.25f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     0.0f, 0.0f, // bottom left corner   index 0
-        0.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     1.0f, 0.0f, // bottom right corner  index 1
-       -0.25f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     0.0f, 1.0f, // top left             index 2
-        0.0f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 0.5f,     1.0f, 1.0f  // top right            index 3
+        -0.25f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, // bottom left corner   index 0
+        0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 0.0f,   // bottom right corner  index 1
+        -0.25f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.0f, 1.0f, // top left             index 2
+        0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f    // top right            index 3
     };
 
-    uint16_t triangleIndices[] = {0,1,2};
-    uint32_t squareIndices[] = {0,1,2, 1,2,3};
+    uint16_t triangleIndices[] = {0, 1, 2};
+    uint32_t squareIndices[] = {0, 1, 2, 1, 2, 3};
 
-    // Create a shader pipeline object that will compile and link our shaders into a 
+    // Create a shader pipeline object that will compile and link our shaders into a
     // shader program in our GPU
     ShaderPipeline shaderPipeline(vertexShaderString, fragmentShaderString);
 
@@ -119,7 +119,6 @@ int main()
 
     // Creates vertex buffer object containing square. This also creates the index buffer used to draw the square
     VertexDataBuffer squareDataBuffer(std::vector<VertexAttribute>{positionAttribute, colorAttribute, texCoordinateAttribute}, 9, squareVertices, sizeof(squareVertices), squareIndices, sizeof(squareIndices));
-    
 
     // Texture Implementation
     // load the image data of the container crate
@@ -127,55 +126,58 @@ int main()
     containerTexture.bind();
     containerTexture.setDefaultTextureParams();
     containerTexture.loadToGpu();
-    //containerTexture.generateMipmap(); // Used to use this because setDefaultTextureParams() set up use of mip maps but that was removed
-    //PROFILE_FUNCTION();
-    // render loop
-    // -----------
+    // containerTexture.generateMipmap(); // Used to use this because setDefaultTextureParams() set up use of mip maps but that was removed
+    // PROFILE_FUNCTION();
+    //  render loop
+    //  -----------
     while (!glfwWindowShouldClose(window))
     {
         {
-        PROFILE_SCOPE("RenderLoop Clear Screen");
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glClearColor(0.2f, 0.3f, 0.6f, 1.0f); // sets the color to use when clearing the color buffer
-        glClear(GL_COLOR_BUFFER_BIT);         // clear the color buffer using the color set above
+            PROFILE_SCOPE("RenderLoop Clear Screen");
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glClearColor(0.2f, 0.3f, 0.6f, 1.0f); // sets the color to use when clearing the color buffer
+            glClear(GL_COLOR_BUFFER_BIT);         // clear the color buffer using the color set above
         }
 
-{
-        PROFILE_SCOPE("RenderLoop Process Input");
-        // input
-        // -----
-        processInput(window);
-}
-float timeValue;
-float attenuateValue;
-int vertexColorLocation;
-{
-        PROFILE_SCOPE("RenderLoop Drawing Triangle");        
-        shaderPipeline.activate();
-        timeValue = glfwGetTime();
-        attenuateValue = (cos(timeValue)/2.0f) + 0.5f;
-        shaderPipeline.setUniformFloat("attenuate", glm::vec3(attenuateValue)); // set the uniform in the shader that will vary the color of the vertices
-       
-        // Bind the triangle data which exists in objectDataBuffer and draw triangle
-        objectDataBuffer.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the currently bound buffer.
-}
-{
-        PROFILE_SCOPE("RenderLoop Drawing Texture");
-        // Bind and draw square
-        textureShaderPipeline.activate();                 // activate the shader program that contains the glsl that samples textures
-        textureShaderPipeline.setUniformFloat("attenuate", glm::vec3(attenuateValue)); // set the uniform in the shader that will vary the color of the vertices
-        squareDataBuffer.bind();                          // bind our vertex data which include texture coordinates for each vertex
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-}
-{
-        PROFILE_SCOPE("RenderLoop Swap Buffers and Poll Events");
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
-        glfwSwapBuffers(window);
-       glfwPollEvents();
-}
+        {
+            PROFILE_SCOPE("RenderLoop Process Input");
+            // input
+            // -----
+            processInput(window);
+        }
+        float timeValue;
+        float attenuateValue;
+        int vertexColorLocation;
+        {
+            PROFILE_SCOPE("RenderLoop Drawing Triangle");
+            shaderPipeline.activate();
+            timeValue = glfwGetTime();
+            attenuateValue = (cos(timeValue) / 2.0f) + 0.5f;
+            shaderPipeline.setUniformFloat("attenuate", glm::vec3(attenuateValue)); // set the uniform in the shader that will vary the color of the vertices
+
+            // Bind the triangle data which exists in objectDataBuffer and draw triangle
+            objectDataBuffer.bind();
+            glDrawArrays(GL_TRIANGLES, 0, 3); // Draw the currently bound buffer.
+        }
+        {
+            PROFILE_SCOPE("RenderLoop Drawing Texture");
+            // Bind and draw square
+            textureShaderPipeline.activate();                                              // activate the shader program that contains the glsl that samples textures
+            textureShaderPipeline.setUniformFloat("attenuate", glm::vec3(attenuateValue)); // set the uniform in the shader that will vary the color of the vertices
+            squareDataBuffer.bind();                                                       // bind our vertex data which include texture coordinates for each vertex
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        }
+        {
+            PROFILE_SCOPE("RenderLoop Swap Buffers");
+            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+            // -------------------------------------------------------------------------------
+            glfwSwapBuffers(window);
+        }
+        {
+            PROFILE_SCOPE("RenderLoop Poll Events");
+            glfwPollEvents();
+        }
     }
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
@@ -189,19 +191,18 @@ int vertexColorLocation;
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		std::cout << "W Pressed" << std::endl;
-
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        std::cout << "W Pressed" << std::endl;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    // make sure the viewport matches the new window dimensions; note that width and 
+    // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height); // calling this will redraw symbols to fit the new window size
 }
